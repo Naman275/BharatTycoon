@@ -289,7 +289,6 @@ const COMMUNITY_CARDS = [
 
 const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
-// Dice dot positions for each face value (3x3 grid, positions 0-8)
 const DICE_DOTS = {
     1: [4],
     2: [2, 6],
@@ -299,13 +298,28 @@ const DICE_DOTS = {
     6: [0, 2, 3, 5, 6, 8]
 };
 
+// Value to face mapping: 1=front, 2=right, 3=back, 4=left, 5=top, 6=bottom
+const DICE_SHOW_CLASS = { 1: 'show-1', 2: 'show-2', 3: 'show-3', 4: 'show-4', 5: 'show-5', 6: 'show-6' };
+
+function initDiceFaces(diceEl) {
+    const faces = diceEl.querySelectorAll('.dice__face');
+    const faceValues = [1, 3, 2, 4, 5, 6]; // front, back, right, left, top, bottom
+    faces.forEach((face, i) => {
+        face.innerHTML = '';
+        const val = faceValues[i];
+        face.dataset.value = val;
+        for (let d = 0; d < 9; d++) {
+            const dot = document.createElement('div');
+            dot.className = 'dice-dot' + (DICE_DOTS[val].includes(d) ? ' active' : '');
+            face.appendChild(dot);
+        }
+    });
+}
+
 function setDiceFace(diceEl, value) {
-    diceEl.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dice-dot' + (DICE_DOTS[value].includes(i) ? ' active' : '');
-        diceEl.appendChild(dot);
-    }
+    // Remove all show classes
+    Object.values(DICE_SHOW_CLASS).forEach(c => diceEl.classList.remove(c));
+    diceEl.classList.add(DICE_SHOW_CLASS[value]);
 }
 
 // ---- GAME STATE ----
@@ -450,8 +464,7 @@ function renderTokens() {
             const tok = document.createElement('div');
             tok.className = 'board-token';
             tok.textContent = p.name.charAt(0).toUpperCase();
-            tok.style.background = p.color;
-            tok.style.setProperty('--glow-color', p.color + '80');
+            tok.style.setProperty('--token-color', p.color);
             tok.title = p.name;
             container.appendChild(tok);
             
@@ -570,15 +583,14 @@ function movePlayer(playerIndex, steps, callback) {
     const floater = document.createElement('div');
     floater.className = 'board-token moving';
     floater.textContent = p.name.charAt(0).toUpperCase();
-    floater.style.background = p.color;
+    floater.style.setProperty('--token-color', p.color);
     floater.style.position = 'absolute';
     floater.style.zIndex = '50';
     floater.style.transition = 'left 0.15s ease, top 0.15s ease';
     floater.style.width = '22px';
-    floater.style.height = '22px';
+    floater.style.height = '26px';
     floater.style.fontSize = '0.6rem';
-    floater.style.boxShadow = `0 3px 12px rgba(0,0,0,0.5), 0 0 16px ${p.color}80`;
-    
+
     const startPos = getCellCenter(p.position);
     if (startPos) {
         floater.style.left = (startPos.x - 11) + 'px';
@@ -1159,7 +1171,9 @@ function initGame() {
         });
     });
     
-    // Init dice faces
+    // Init 3D dice
+    initDiceFaces($('dice1'));
+    initDiceFaces($('dice2'));
     setDiceFace($('dice1'), 1);
     setDiceFace($('dice2'), 1);
 
