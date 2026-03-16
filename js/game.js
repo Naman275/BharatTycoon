@@ -520,32 +520,31 @@ function animateDice(d1, d2, callback) {
     
     let ticks = 0;
     const interval = setInterval(() => {
-        dice1.querySelector('.dice-face').textContent = DICE_FACES[Math.floor(Math.random() * 6)];
-        dice2.querySelector('.dice-face').textContent = DICE_FACES[Math.floor(Math.random() * 6)];
+        setDiceFace(dice1, Math.floor(Math.random() * 6) + 1);
+        setDiceFace(dice2, Math.floor(Math.random() * 6) + 1);
         ticks++;
-        if (ticks > 15) {
+        if (ticks > 18) {
             clearInterval(interval);
             dice1.classList.remove('rolling');
             dice2.classList.remove('rolling');
             dice1.classList.add('landed');
             dice2.classList.add('landed');
-            dice1.querySelector('.dice-face').textContent = DICE_FACES[d1 - 1];
-            dice2.querySelector('.dice-face').textContent = DICE_FACES[d2 - 1];
-            
+            setDiceFace(dice1, d1);
+            setDiceFace(dice2, d2);
+
             setTimeout(() => {
                 dice1.classList.remove('landed');
                 dice2.classList.remove('landed');
-            }, 400);
-            
+            }, 500);
+
             $('diceResult').textContent = `${d1} + ${d2} = ${d1 + d2}${d1 === d2 ? ' 🎯 DOUBLES!' : ''}`;
-            
-            // Particles at dice area
+
             const diceArea = $('diceArea').getBoundingClientRect();
-            Particles.spawn(diceArea.left + diceArea.width / 2, diceArea.top, 15);
-            
-            callback(d1, d2);
+            Particles.spawn(diceArea.left + diceArea.width / 2, diceArea.top, 20, ['#FFD700', '#FF8C00', '#fff']);
+
+            setTimeout(() => callback(d1, d2), 400);
         }
-    }, 60);
+    }, 70);
 }
 
 // ---- MOVEMENT ----
