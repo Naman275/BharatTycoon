@@ -711,7 +711,7 @@ function handleLanding() {
             
         case 'gotojail':
             goToJail(game.currentPlayer);
-            break;
+            return; // goToJail handles nextTurn internally
             
         case 'parking':
             toast('🅿️', `${p.name} is relaxing at Free Parking!`, 'info');
@@ -883,7 +883,7 @@ function executeCard(card) {
             return;
         case 'jail':
             goToJail(game.currentPlayer);
-            return;
+            return; // goToJail handles nextTurn
         case 'repairPay':
             const totalHouses = Object.values(p.houses).reduce((sum, h) => sum + h, 0);
             const repairCost = totalHouses * card.value;
@@ -905,29 +905,33 @@ function goToJail(playerIndex) {
     p.position = 10;
     p.inJail = true;
     p.jailTurns = 0;
-    
+
     toast('👮', `${p.name} goes to JAIL!`, 'negative');
     SFX.play('jail');
+    game.isAnimating = false;
     renderTokens();
-    
-    setTimeout(() => showActionBar(), 1000);
+
+    setTimeout(() => nextTurn(), 1500);
 }
 
 function handleJailTurn() {
     const p = currentPlayerObj();
-    
+    game.isAnimating = false;
+
     if (p.jailTurns >= 3) {
-        // Must pay and get out
         p.money -= 50;
         p.inJail = false;
         p.jailTurns = 0;
         moneyFloat(50, false);
-        toast('🔓', `${p.name} paid ₹50 bail and is free!`, 'info');
+        toast('🔓', `${p.name} paid ₹50 bail after 3 turns!`, 'info');
         SFX.play('pay');
         updateAllPanels();
-        return true; // Can roll normally
+        checkBankrupt(game.currentPlayer);
+        game.phase = 'roll';
+        $('rollBtn').disabled = false;
+        return;
     }
-    
+
     showPopup('🔒', 'You\'re in Jail!', `Turn ${p.jailTurns + 1}/3. Pay ₹50 to get out or try rolling doubles.`, '', [
         { text: '💰 Pay ₹50', class: 'yes', action: () => {
             p.money -= 50;
@@ -936,12 +940,16 @@ function handleJailTurn() {
             moneyFloat(50, false);
             SFX.play('pay');
             updateAllPanels();
+            checkBankrupt(game.currentPlayer);
             game.phase = 'roll';
+            game.isAnimating = false;
             $('rollBtn').disabled = false;
         }},
         { text: '🎲 Roll Doubles', class: 'no', action: () => {
             const [d1, d2] = rollDice();
+            game.isAnimating = true;
             animateDice(d1, d2, () => {
+                game.isAnimating = false;
                 if (d1 === d2) {
                     p.inJail = false;
                     p.jailTurns = 0;
@@ -951,15 +959,12 @@ function handleJailTurn() {
                 } else {
                     p.jailTurns++;
                     toast('🔒', `No doubles. Still in jail. (${p.jailTurns}/3)`, 'negative');
-                    nextTurn();
+                    setTimeout(() => nextTurn(), 800);
                 }
             });
         }}
     ]);
-    
-    return false;
 }
-
 // ---- BANKRUPTCY ----
 function checkBankrupt(playerIndex) {
     const p = game.players[playerIndex];
@@ -1007,6 +1012,7 @@ function showActionBar() {
 
 function nextTurn() {
     $('actionBar').style.display = 'none';
+    game.isAnimating = false;
     
     do {
         game.currentPlayer = (game.currentPlayer + 1) % game.players.length;
