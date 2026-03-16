@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bharat Tycoon — 2D Board Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Particle Canvas (background effects) -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen active">
+        <div class="start-content">
+            <div class="game-logo">
+                <div class="logo-icon">🏛️</div>
+                <h1>BHARAT<span>TYCOON</span></h1>
+                <p class="tagline">Buy. Build. Dominate. 🇮🇳</p>
+            </div>
+            <div class="player-setup">
+                <h3>🎮 Select Players</h3>
+                <div class="player-count-selector">
+                    <button class="count-btn active" data-count="2">2</button>
+                    <button class="count-btn" data-count="3">3</button>
+                    <button class="count-btn" data-count="4">4</button>
+                </div>
+                <div id="playerNames" class="player-names">
+                    <div class="player-input" data-player="0">
+                        <span class="token-preview">🚗</span>
+                        <input type="text" placeholder="Player 1" maxlength="12">
+                    </div>
+                    <div class="player-input" data-player="1">
+                        <span class="token-preview">🚀</span>
+                        <input type="text" placeholder="Player 2" maxlength="12">
+                    </div>
+                </div>
+                <button id="startBtn" class="btn-start">
+                    <span>🎲 START GAME</span>
+                    <div class="btn-glow"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <!-- Top HUD -->
+        <div class="hud-top">
+            <div class="turn-indicator" id="turnIndicator">
+                <span class="turn-token">🚗</span>
+                <span class="turn-name">Player 1's Turn</span>
+            </div>
+            <div class="round-counter" id="roundCounter">Round 1</div>
+        </div>
+
+        <!-- Board Container -->
+        <div class="board-wrapper">
+            <div class="board" id="gameBoard">
+                <!-- Corner: GO -->
+                <div class="cell corner go" data-pos="0">
+                    <div class="corner-content">
+                        <div class="corner-icon">🏁</div>
+                        <div class="corner-label">GO</div>
+                        <div class="corner-sub">Collect ₹200</div>
+                    </div>
+                    <div class="tokens-container" data-pos="0"></div>
+                </div>
+                <!-- Bottom Row (pos 1-9) -->
+                <div class="cell bottom prop" data-pos="1" data-color="brown">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Chandni Chowk</div>
+                    <div class="cell-price">₹60</div>
+                    <div class="tokens-container" data-pos="1"></div>
+                    <div class="house-container" data-pos="1"></div>
+                </div>
+                <div class="cell bottom special" data-pos="2">
+                    <div class="cell-icon">🃏</div>
+                    <div class="cell-name">Community</div>
+                    <div class="tokens-container" data-pos="2"></div>
+                </div>
+                <div class="cell bottom prop" data-pos="3" data-color="brown">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Lajpat Nagar</div>
+                    <div class="cell-price">₹60</div>
+                    <div class="tokens-container" data-pos="3"></div>
+                    <div class="house-container" data-pos="3"></div>
+                </div>
+                <div class="cell bottom special tax" data-pos="4">
+                    <div class="cell-icon">💸</div>
+                    <div class="cell-name">Income Tax</div>
+                    <div class="cell-price">Pay ₹200</div>
+                    <div class="tokens-container" data-pos="4"></div>
+                </div>
+                <div class="cell bottom special railroad" data-pos="5">
+                    <div class="cell-icon">🚂</div>
+                    <div class="cell-name">Mumbai Local</div>
+                    <div class="cell-price">₹200</div>
+                    <div class="tokens-container" data-pos="5"></div>
+                </div>
+                <div class="cell bottom prop" data-pos="6" data-color="lightblue">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Sarojini Mkt</div>
+                    <div class="cell-price">₹100</div>
+                    <div class="tokens-container" data-pos="6"></div>
+                    <div class="house-container" data-pos="6"></div>
+                </div>
+                <div class="cell bottom special" data-pos="7">
+                    <div class="cell-icon">❓</div>
+                    <div class="cell-name">Chance</div>
+                    <div class="tokens-container" data-pos="7"></div>
+                </div>
+                <div class="cell bottom prop" data-pos="8" data-color="lightblue">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Karol Bagh</div>
+                    <div class="cell-price">₹100</div>
+                    <div class="tokens-container" data-pos="8"></div>
+                    <div class="house-container" data-pos="8"></div>
+                </div>
+                <div class="cell bottom prop" data-pos="9" data-color="lightblue">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Connaught Pl</div>
+                    <div class="cell-price">₹120</div>
+                    <div class="tokens-container" data-pos="9"></div>
+                    <div class="house-container" data-pos="9"></div>
+                </div>
+
+                <!-- Corner: JAIL -->
+                <div class="cell corner jail" data-pos="10">
+                    <div class="corner-content">
+                        <div class="corner-icon">🔒</div>
+                        <div class="corner-label">JAIL</div>
+                        <div class="corner-sub">Just Visiting</div>
+                    </div>
+                    <div class="tokens-container" data-pos="10"></div>
+                </div>
+
+                <!-- Left Column (pos 11-19) -->
+                <div class="cell left prop" data-pos="11" data-color="pink">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">MG Road BLR</div>
+                    <div class="cell-price">₹140</div>
+                    <div class="tokens-container" data-pos="11"></div>
+                    <div class="house-container" data-pos="11"></div>
+                </div>
+                <div class="cell left special utility" data-pos="12">
+                    <div class="cell-icon">⚡</div>
+                    <div class="cell-name">Tata Power</div>
+                    <div class="cell-price">₹150</div>
+                    <div class="tokens-container" data-pos="12"></div>
+                </div>
+                <div class="cell left prop" data-pos="13" data-color="pink">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Brigade Rd</div>
+                    <div class="cell-price">₹140</div>
+                    <div class="tokens-container" data-pos="13"></div>
+                    <div class="house-container" data-pos="13"></div>
+                </div>
+                <div class="cell left prop" data-pos="14" data-color="pink">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Indiranagar</div>
+                    <div class="cell-price">₹160</div>
+                    <div class="tokens-container" data-pos="14"></div>
+                    <div class="house-container" data-pos="14"></div>
+                </div>
+                <div class="cell left special railroad" data-pos="15">
+                    <div class="cell-icon">🚂</div>
+                    <div class="cell-name">Rajdhani Exp</div>
+                    <div class="cell-price">₹200</div>
+                    <div class="tokens-container" data-pos="15"></div>
+                </div>
+                <div class="cell left prop" data-pos="16" data-color="orange">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Bandra West</div>
+                    <div class="cell-price">₹180</div>
+                    <div class="tokens-container" data-pos="16"></div>
+                    <div class="house-container" data-pos="16"></div>
+                </div>
+                <div class="cell left special" data-pos="17">
+                    <div class="cell-icon">🃏</div>
+                    <div class="cell-name">Community</div>
+                    <div class="tokens-container" data-pos="17"></div>
+                </div>
+                <div class="cell left prop" data-pos="18" data-color="orange">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Juhu Beach</div>
+                    <div class="cell-price">₹180</div>
+                    <div class="tokens-container" data-pos="18"></div>
+                    <div class="house-container" data-pos="18"></div>
+                </div>
+                <div class="cell left prop" data-pos="19" data-color="orange">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Powai</div>
+                    <div class="cell-price">₹200</div>
+                    <div class="tokens-container" data-pos="19"></div>
+                    <div class="house-container" data-pos="19"></div>
+                </div>
+
+                <!-- Corner: FREE PARKING -->
+                <div class="cell corner parking" data-pos="20">
+                    <div class="corner-content">
+                        <div class="corner-icon">🅿️</div>
+                        <div class="corner-label">FREE</div>
+                        <div class="corner-sub">Parking</div>
+                    </div>
+                    <div class="tokens-container" data-pos="20"></div>
+                </div>
+
+                <!-- Top Row (pos 21-29) -->
+                <div class="cell top prop" data-pos="21" data-color="red">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Park Street</div>
+                    <div class="cell-price">₹220</div>
+                    <div class="tokens-container" data-pos="21"></div>
+                    <div class="house-container" data-pos="21"></div>
+                </div>
+                <div class="cell top special" data-pos="22">
+                    <div class="cell-icon">❓</div>
+                    <div class="cell-name">Chance</div>
+                    <div class="tokens-container" data-pos="22"></div>
+                </div>
+                <div class="cell top prop" data-pos="23" data-color="red">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Salt Lake</div>
+                    <div class="cell-price">₹220</div>
+                    <div class="tokens-container" data-pos="23"></div>
+                    <div class="house-container" data-pos="23"></div>
+                </div>
+                <div class="cell top prop" data-pos="24" data-color="red">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Howrah Br</div>
+                    <div class="cell-price">₹240</div>
+                    <div class="tokens-container" data-pos="24"></div>
+                    <div class="house-container" data-pos="24"></div>
+                </div>
+                <div class="cell top special railroad" data-pos="25">
+                    <div class="cell-icon">🚂</div>
+                    <div class="cell-name">Shatabdi Exp</div>
+                    <div class="cell-price">₹200</div>
+                    <div class="tokens-container" data-pos="25"></div>
+                </div>
+                <div class="cell top prop" data-pos="26" data-color="yellow">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Hawa Mahal</div>
+                    <div class="cell-price">₹260</div>
+                    <div class="tokens-container" data-pos="26"></div>
+                    <div class="house-container" data-pos="26"></div>
+                </div>
+                <div class="cell top prop" data-pos="27" data-color="yellow">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">City Palace</div>
+                    <div class="cell-price">₹260</div>
+                    <div class="tokens-container" data-pos="27"></div>
+                    <div class="house-container" data-pos="27"></div>
+                </div>
+                <div class="cell top special utility" data-pos="28">
+                    <div class="cell-icon">💧</div>
+                    <div class="cell-name">Jal Board</div>
+                    <div class="cell-price">₹150</div>
+                    <div class="tokens-container" data-pos="28"></div>
+                </div>
+                <div class="cell top prop" data-pos="29" data-color="yellow">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Amber Fort</div>
+                    <div class="cell-price">₹280</div>
+                    <div class="tokens-container" data-pos="29"></div>
+                    <div class="house-container" data-pos="29"></div>
+                </div>
+
+                <!-- Corner: GO TO JAIL -->
+                <div class="cell corner gotojail" data-pos="30">
+                    <div class="corner-content">
+                        <div class="corner-icon">👮</div>
+                        <div class="corner-label">GO TO</div>
+                        <div class="corner-sub">JAIL!</div>
+                    </div>
+                    <div class="tokens-container" data-pos="30"></div>
+                </div>
+
+                <!-- Right Column (pos 31-39) -->
+                <div class="cell right prop" data-pos="31" data-color="green">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Marine Dr</div>
+                    <div class="cell-price">₹300</div>
+                    <div class="tokens-container" data-pos="31"></div>
+                    <div class="house-container" data-pos="31"></div>
+                </div>
+                <div class="cell right prop" data-pos="32" data-color="green">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Malabar Hill</div>
+                    <div class="cell-price">₹300</div>
+                    <div class="tokens-container" data-pos="32"></div>
+                    <div class="house-container" data-pos="32"></div>
+                </div>
+                <div class="cell right special" data-pos="33">
+                    <div class="cell-icon">🃏</div>
+                    <div class="cell-name">Community</div>
+                    <div class="tokens-container" data-pos="33"></div>
+                </div>
+                <div class="cell right prop" data-pos="34" data-color="green">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Nariman Pt</div>
+                    <div class="cell-price">₹320</div>
+                    <div class="tokens-container" data-pos="34"></div>
+                    <div class="house-container" data-pos="34"></div>
+                </div>
+                <div class="cell right special railroad" data-pos="35">
+                    <div class="cell-icon">🚂</div>
+                    <div class="cell-name">Vande Bharat</div>
+                    <div class="cell-price">₹200</div>
+                    <div class="tokens-container" data-pos="35"></div>
+                </div>
+                <div class="cell right special" data-pos="36">
+                    <div class="cell-icon">❓</div>
+                    <div class="cell-name">Chance</div>
+                    <div class="tokens-container" data-pos="36"></div>
+                </div>
+                <div class="cell right prop" data-pos="37" data-color="blue">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Lutyens Delhi</div>
+                    <div class="cell-price">₹350</div>
+                    <div class="tokens-container" data-pos="37"></div>
+                    <div class="house-container" data-pos="37"></div>
+                </div>
+                <div class="cell right special tax" data-pos="38">
+                    <div class="cell-icon">💎</div>
+                    <div class="cell-name">Luxury Tax</div>
+                    <div class="cell-price">Pay ₹100</div>
+                    <div class="tokens-container" data-pos="38"></div>
+                </div>
+                <div class="cell right prop" data-pos="39" data-color="blue">
+                    <div class="color-bar"></div>
+                    <div class="cell-name">Rashtrapati B</div>
+                    <div class="cell-price">₹400</div>
+                    <div class="tokens-container" data-pos="39"></div>
+                    <div class="house-container" data-pos="39"></div>
+                </div>
+
+                <!-- Center Area -->
+                <div class="board-center">
+                    <div class="center-logo">
+                        <div class="center-title">BHARAT</div>
+                        <div class="center-subtitle">TYCOON</div>
+                        <div class="center-icon">🏛️</div>
+                    </div>
+                    <!-- Dice Area -->
+                    <div class="dice-area" id="diceArea">
+                        <div class="dice" id="dice1">
+                            <div class="dice-face front">⚀</div>
+                        </div>
+                        <div class="dice" id="dice2">
+                            <div class="dice-face front">⚀</div>
+                        </div>
+                    </div>
+                    <button class="roll-btn" id="rollBtn">
+                        🎲 ROLL DICE
+                    </button>
+                    <div class="dice-result" id="diceResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Panels -->
+        <div class="player-panels" id="playerPanels"></div>
+
+        <!-- Action Buttons -->
+        <div class="action-bar" id="actionBar" style="display:none">
+            <button class="action-btn buy-btn" id="buyBtn">🏠 Buy Property</button>
+            <button class="action-btn build-btn" id="buildBtn">🏗️ Build House</button>
+            <button class="action-btn end-btn" id="endTurnBtn">⏭️ End Turn</button>
+        </div>
+    </div>
+
+    <!-- Popup Overlay -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-card" id="popupCard">
+            <div class="popup-icon" id="popupIcon">🏠</div>
+            <h2 id="popupTitle">Property Available!</h2>
+            <p id="popupText">Would you like to buy this property?</p>
+            <div class="popup-details" id="popupDetails"></div>
+            <div class="popup-buttons" id="popupButtons">
+                <button class="popup-btn yes" id="popupYes">✅ Yes</button>
+                <button class="popup-btn no" id="popupNo">❌ No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Animation Overlay -->
+    <div class="card-overlay" id="cardOverlay">
+        <div class="chance-card" id="chanceCard">
+            <div class="card-front">
+                <div class="card-type" id="cardType">CHANCE</div>
+                <div class="card-icon" id="cardIcon">❓</div>
+                <div class="card-text" id="cardText">Your card text here</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Screen -->
+    <div id="winScreen" class="screen">
+        <div class="win-content">
+            <div class="trophy">🏆</div>
+            <h1 class="win-title" id="winTitle">Player 1 WINS!</h1>
+            <p class="win-sub">The Bharat Tycoon!</p>
+            <div class="win-stats" id="winStats"></div>
+            <button class="btn-start" onclick="location.reload()">
+                <span>🔄 Play Again</span>
+                <div class="btn-glow"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
