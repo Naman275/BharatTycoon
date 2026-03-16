@@ -513,8 +513,37 @@ html, body {
     z-index: 2;
 }
 
+.cell-illust-img {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+    position: relative;
+    z-index: 2;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.corner-icon-img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.2));
+}
+
+.cell-icon-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    margin-bottom: 1px;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+}
+
 .special { background: linear-gradient(145deg, #f1f8e9, #e8f5e9); }
 .cell-icon { font-size: 0.9rem; margin-bottom: 1px; }
+.cell-icon img { width: 18px; height: 18px; }
 .tax { background: linear-gradient(145deg, #fff8e1, #fff3e0); }
 .railroad { background: linear-gradient(145deg, #f3e5f5, #ede7f6); }
 .utility { background: linear-gradient(145deg, #e1f5fe, #e3f2fd); }
@@ -1218,6 +1247,9 @@ html, body {
     .cell-price { font-size: 0.3rem; }
     .corner-label { font-size: 0.5rem; }
     .corner-icon { font-size: 1rem; }
+    .corner-icon-img { width: 22px; height: 22px; }
+    .cell-illust-img { width: 12px; height: 12px; }
+    .cell-icon-img { width: 14px; height: 14px; }
     .dice-scene { width: 36px; height: 36px; }
     .dice { width: 36px; height: 36px; }
     .dice__face { width: 36px; height: 36px; padding: 5px; }
@@ -1242,5 +1274,8 @@ html, body {
     .board { width: 100vw; height: 100vw; border-radius: 0; transform: rotateX(3deg); }
     .cell-name { font-size: 0.22rem; }
     .corner-icon { font-size: 0.7rem; }
+    .corner-icon-img { width: 16px; height: 16px; }
+    .cell-illust-img { width: 10px; height: 10px; }
+    .cell-icon-img { width: 12px; height: 12px; }
     .center-title { font-size: 0.6rem; }
 }
