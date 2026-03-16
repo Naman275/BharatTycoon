@@ -899,6 +899,59 @@ function executeCard(card) {
     showActionBar();
 }
 
+// ---- JAIL BARS ANIMATION ----
+function showJailBars(animate = true) {
+    const bars = $('jailBars');
+    const door = $('jailDoor');
+    if (!bars) return;
+    
+    bars.classList.add('active');
+    door.classList.remove('open');
+    
+    if (animate) {
+        bars.classList.add('closing');
+        SFX.play('jail');
+        setTimeout(() => bars.classList.remove('closing'), 1200);
+    }
+}
+
+function hideJailBars() {
+    const bars = $('jailBars');
+    const door = $('jailDoor');
+    if (!bars) return;
+    
+    // Open the door first
+    door.classList.add('open');
+    SFX.play('buy');
+    
+    // Then fade out bars after door swings
+    setTimeout(() => {
+        bars.classList.remove('active');
+        door.classList.remove('open');
+    }, 1200);
+}
+
+function shakeJailBars() {
+    const bars = $('jailBars');
+    if (!bars) return;
+    bars.classList.add('shake');
+    SFX.play('jail');
+    setTimeout(() => bars.classList.remove('shake'), 500);
+}
+
+function updateJailBarsVisibility() {
+    // Show bars if ANY player is in jail
+    const anyInJail = game.players.some(p => p.inJail && !p.bankrupt);
+    const bars = $('jailBars');
+    if (!bars) return;
+    if (anyInJail) {
+        bars.classList.add('active');
+        $('jailDoor').classList.remove('open');
+    } else {
+        bars.classList.remove('active');
+    }
+}
+
 // ---- JAIL ----
 function goToJail(playerIndex) {
     const p = game.players[playerIndex];
@@ -907,16 +960,21 @@ function goToJail(playerIndex) {
     p.jailTurns = 0;
 
     toast('👮', `${p.name} goes to JAIL!`, 'negative');
-    SFX.play('jail');
     game.isAnimating = false;
     renderTokens();
+    
+    // Animate jail bars closing
+    showJailBars(true);
 
-    setTimeout(() => nextTurn(), 1500);
+    setTimeout(() => nextTurn(), 2000);
 }
 
 function handleJailTurn() {
     const p = currentPlayerObj();
     game.isAnimating = false;
+
+    // Make sure bars are showing
+    updateJailBarsVisibility();
 
     if (p.jailTurns >= 3) {
         p.money -= 50;
@@ -927,8 +985,14 @@ function handleJailTurn() {
         SFX.play('pay');
         updateAllPanels();
         checkBankrupt(game.currentPlayer);
-        game.phase = 'roll';
-        $('rollBtn').disabled = false;
+        
+        // Open jail door animation
+        hideJailBars();
+        setTimeout(() => {
+            updateJailBarsVisibility();
+            game.phase = 'roll';
+            $('rollBtn').disabled = false;
+        }, 1300);
         return;
     }
 
@@ -941,9 +1005,15 @@ function handleJailTurn() {
             SFX.play('pay');
             updateAllPanels();
             checkBankrupt(game.currentPlayer);
-            game.phase = 'roll';
-            game.isAnimating = false;
-            $('rollBtn').disabled = false;
+            
+            // Open jail door
+            hideJailBars();
+            setTimeout(() => {
+                updateJailBarsVisibility();
+                game.phase = 'roll';
+                game.isAnimating = false;
+                $('rollBtn').disabled = false;
+            }, 1300);
         }},
         { text: '🎲 Roll Doubles', class: 'no', action: () => {
             const [d1, d2] = rollDice();
@@ -954,12 +1024,20 @@ function handleJailTurn() {
                     p.inJail = false;
                     p.jailTurns = 0;
                     toast('🎯', `${p.name} rolled doubles and is FREE!`, 'positive');
-                    SFX.play('buy');
-                    movePlayer(game.currentPlayer, d1 + d2, handleLanding);
+                    
+                    // Open jail door then move
+                    hideJailBars();
+                    setTimeout(() => {
+                        updateJailBarsVisibility();
+                        movePlayer(game.currentPlayer, d1 + d2, handleLanding);
+                    }, 1000);
                 } else {
                     p.jailTurns++;
                     toast('🔒', `No doubles. Still in jail. (${p.jailTurns}/3)`, 'negative');
-                    setTimeout(() => nextTurn(), 800);
+                    
+                    // Shake the bars — you're not getting out!
+                    shakeJailBars();
+                    setTimeout(() => nextTurn(), 1000);
                 }
             });
         }}
