@@ -259,52 +259,48 @@ html, body {
 /* ---- GAME BOARD ---- */
 #gameScreen {
     background: linear-gradient(135deg, #0d0521, #1a0a2e, #2d1450);
-    padding: 8px;
+    padding: 0;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    justify-content: center;
 }
 
-.hud-top {
+/* HUD inside board center */
+.center-hud {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 6px 16px;
-    z-index: 5;
+    gap: 8px;
+    z-index: 3;
 }
 
 .turn-indicator {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.08);
-    padding: 8px 20px;
-    border-radius: 50px;
-    border: 1px solid rgba(255,255,255,0.1);
-    animation: turnPulse 2s infinite;
+    gap: 6px;
+    background: rgba(0,0,0,0.25);
+    padding: 4px 12px 4px 4px;
+    border-radius: 30px;
+    border: 1.5px solid rgba(255,215,0,0.4);
 }
 
-@keyframes turnPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.3); }
-    50% { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
-}
-
-.turn-token { font-size: 1.3rem; }
-.turn-name { font-weight: 700; font-size: 0.9rem; }
+.turn-token { font-size: 1rem; }
+.turn-name { font-weight: 700; font-size: 0.6rem; color: #1b5e20; }
 
 .round-counter {
-    background: rgba(255,215,0,0.15);
-    color: var(--gold);
-    padding: 8px 20px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    background: rgba(0,0,0,0.2);
+    color: #1b5e20;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 0.6rem;
 }
 
 .board-wrapper {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
     z-index: 2;
 }
 
@@ -313,12 +309,12 @@ html, body {
     display: grid;
     grid-template-columns: 1.4fr repeat(9, 1fr) 1.4fr;
     grid-template-rows: 1.4fr repeat(9, 1fr) 1.4fr;
-    width: min(85vw, 85vh);
-    height: min(85vw, 85vh);
-    max-width: 640px;
-    max-height: 640px;
+    width: min(98vw, 98vh);
+    height: min(98vw, 98vh);
+    max-width: 720px;
+    max-height: 720px;
     border: 3px solid var(--board-border);
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 0 60px rgba(46, 125, 50, 0.3), inset 0 0 80px rgba(0,0,0,0.2);
     position: relative;
@@ -543,11 +539,11 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    justify-content: space-evenly;
+    gap: 2px;
     position: relative;
     overflow: hidden;
-    padding: 8px;
+    padding: 6px;
 }
 
 .board-center::before {
@@ -567,18 +563,10 @@ html, body {
 
 .center-title {
     font-family: 'Fredoka One', cursive;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #1b5e20;
-    letter-spacing: 4px;
-    text-shadow: 2px 2px 0 rgba(255,255,255,0.3);
-    line-height: 1;
-}
-
-.center-subtitle {
-    font-family: 'Fredoka One', cursive;
-    font-size: 0.8rem;
-    color: #2e7d32;
-    letter-spacing: 8px;
+    letter-spacing: 3px;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
     line-height: 1;
 }
 
@@ -590,52 +578,54 @@ html, body {
 }
 
 .dice {
-    width: 48px; height: 48px;
-    background: #fff;
-    border-radius: 10px;
+    width: 46px; height: 46px;
+    background: linear-gradient(145deg, #ffffff, #e8e8e8);
+    border-radius: 8px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    padding: 6px;
+    padding: 7px;
     gap: 2px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.25), inset 0 -2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 0 #bbb;
     transition: transform 0.3s;
-    border: 2px solid #d0d0d0;
+    border: none;
+    position: relative;
 }
 
 .dice-dot {
     width: 100%; height: 100%;
     border-radius: 50%;
     background: transparent;
+    transition: background 0.1s;
 }
 
 .dice-dot.active {
-    background: #1a1a2e;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+    background: radial-gradient(circle at 35% 35%, #333, #111);
+    box-shadow: inset 0 2px 3px rgba(0,0,0,0.4), 0 1px 1px rgba(255,255,255,0.2);
 }
 
 .dice.rolling {
-    animation: diceRoll 0.12s infinite;
+    animation: diceRoll3D 0.1s infinite;
 }
 
-@keyframes diceRoll {
-    0% { transform: rotate(0deg) scale(1); }
-    25% { transform: rotate(20deg) scale(1.15) translateY(-4px); }
-    50% { transform: rotate(-15deg) scale(0.9); }
-    75% { transform: rotate(10deg) scale(1.1) translateY(-2px); }
-    100% { transform: rotate(0deg) scale(1); }
+@keyframes diceRoll3D {
+    0% { transform: rotateX(0deg) rotateZ(0deg); }
+    25% { transform: rotateX(15deg) rotateZ(8deg) scale(1.1); }
+    50% { transform: rotateX(-10deg) rotateZ(-12deg) scale(0.95); }
+    75% { transform: rotateX(8deg) rotateZ(5deg) scale(1.05); }
+    100% { transform: rotateX(0deg) rotateZ(0deg); }
 }
 
 .dice.landed {
-    animation: diceBounce 0.5s ease;
+    animation: diceDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes diceBounce {
-    0% { transform: scale(1.4) rotate(15deg); }
-    30% { transform: scale(0.85) rotate(-8deg); }
-    50% { transform: scale(1.1) rotate(4deg); }
-    70% { transform: scale(0.95) rotate(-2deg); }
-    100% { transform: scale(1) rotate(0deg); }
+@keyframes diceDrop {
+    0% { transform: scale(1.4) rotateZ(20deg); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    40% { transform: scale(0.9) rotateZ(-5deg); }
+    60% { transform: scale(1.05) rotateZ(2deg); }
+    80% { transform: scale(0.98) rotateZ(-1deg); }
+    100% { transform: scale(1) rotateZ(0deg); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
 }
 
 .roll-btn {
@@ -643,14 +633,14 @@ html, body {
     background: linear-gradient(135deg, #FFD700, #FF8C00);
     color: #1a0a2e;
     border: none;
-    padding: 10px 28px;
+    padding: 7px 22px;
     border-radius: 50px;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     font-weight: 800;
     cursor: pointer;
     font-family: inherit;
     transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 3px 12px rgba(255, 215, 0, 0.4);
 }
 
 .roll-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5); }
@@ -735,22 +725,22 @@ html, body {
     border: 1px solid rgba(0,0,0,0.2);
 }
 
-/* Action Bar */
-.action-bar {
+/* Action Buttons (inside board center) */
+.center-actions {
     display: flex;
-    gap: 8px;
-    padding: 8px;
+    gap: 6px;
+    z-index: 3;
+    flex-wrap: wrap;
     justify-content: center;
-    z-index: 5;
 }
 
 .action-btn {
-    padding: 10px 20px;
-    border-radius: 50px;
+    padding: 5px 14px;
+    border-radius: 20px;
     border: none;
     font-family: inherit;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.65rem;
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -1086,15 +1076,15 @@ html, body {
 /* Owner badge on cells */
 .owner-badge {
     position: absolute;
-    bottom: 1px; right: 1px;
-    width: 12px; height: 12px;
+    bottom: 1px; left: 1px;
+    width: 10px; height: 10px;
     border-radius: 50%;
-    border: 1.5px solid #fff;
+    border: 1.5px solid rgba(255,255,255,0.8);
     z-index: 8;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.35rem;
+    font-size: 0.3rem;
     font-weight: 900;
     color: #fff;
     text-shadow: 0 0 2px rgba(0,0,0,0.5);
@@ -1102,7 +1092,8 @@ html, body {
 }
 
 .cell.owned {
-    background: rgba(255,255,200,0.15);
+    outline: 2px solid var(--owner-color, rgba(255,215,0,0.5));
+    outline-offset: -2px;
 }
 
 /* Money animation */
@@ -1125,28 +1116,21 @@ html, body {
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
-    .board { width: 95vw; height: 95vw; }
-    .game-logo h1 { font-size: 2.5rem; }
-    .game-logo h1 span { font-size: 1.8rem; }
-    .player-setup { padding: 20px; margin: 0 16px; }
-    .center-title { font-size: 1.2rem; }
-    .center-subtitle { font-size: 0.8rem; }
+    .board { width: 99vw; height: 99vw; }
+    .center-title { font-size: 0.8rem; letter-spacing: 2px; }
     .cell-name { font-size: 0.3rem; }
     .cell-price { font-size: 0.3rem; }
     .corner-label { font-size: 0.5rem; }
     .corner-icon { font-size: 1rem; }
-    .dice { width: 38px; height: 38px; padding: 5px; }
-    .roll-btn { padding: 8px 20px; font-size: 0.8rem; }
-    .popup-card { padding: 20px; }
-    .player-panel { padding: 8px 10px; }
-    .panel-money { font-size: 0.9rem; }
+    .dice { width: 36px; height: 36px; padding: 5px; }
+    .roll-btn { padding: 5px 16px; font-size: 0.7rem; }
+    .action-btn { padding: 4px 10px; font-size: 0.55rem; }
 }
 
 @media (max-width: 400px) {
-    .board { width: 98vw; height: 98vw; }
+    .board { width: 100vw; height: 100vw; border-radius: 0; }
     .cell-name { font-size: 0.25rem; }
     .corner-icon { font-size: 0.8rem; }
-    .center-title { font-size: 0.9rem; letter-spacing: 3px; }
-    .center-subtitle { font-size: 0.6rem; letter-spacing: 5px; }
-    .center-icon { font-size: 1.5rem; }
+    .center-title { font-size: 0.7rem; letter-spacing: 2px; }
+    .dice { width: 32px; height: 32px; padding: 4px; }
 }

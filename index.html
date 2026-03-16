@@ -62,15 +62,6 @@
 
     <!-- Game Screen -->
     <div id="gameScreen" class="screen">
-        <!-- Top HUD -->
-        <div class="hud-top">
-            <div class="turn-indicator" id="turnIndicator">
-                <span class="turn-token">🚗</span>
-                <span class="turn-name">Player 1's Turn</span>
-            </div>
-            <div class="round-counter" id="roundCounter">Round 1</div>
-        </div>
-
         <!-- Board Container -->
         <div class="board-wrapper">
             <div class="board" id="gameBoard">
@@ -355,30 +346,30 @@
 
                 <!-- Center Area -->
                 <div class="board-center">
-                    <div class="center-logo">
-                        <div class="center-title">BHARAT</div>
-                        <div class="center-subtitle">TYCOON</div>
+                    <div class="center-hud">
+                        <div class="turn-indicator" id="turnIndicator">
+                            <span class="turn-token">🚗</span>
+                            <span class="turn-name">Player 1</span>
+                        </div>
+                        <div class="round-counter" id="roundCounter">R1</div>
                     </div>
-                    <!-- Player Panels Inside Board -->
+                    <div class="center-logo">
+                        <div class="center-title">BHARAT TYCOON</div>
+                    </div>
                     <div class="center-players" id="playerPanels"></div>
-                    <!-- Dice Area -->
                     <div class="dice-area" id="diceArea">
                         <div class="dice" id="dice1"></div>
                         <div class="dice" id="dice2"></div>
                     </div>
-                    <button class="roll-btn" id="rollBtn">
-                        🎲 ROLL DICE
-                    </button>
+                    <button class="roll-btn" id="rollBtn">🎲 ROLL</button>
                     <div class="dice-result" id="diceResult"></div>
+                    <div class="center-actions" id="actionBar" style="display:none">
+                        <button class="action-btn buy-btn" id="buyBtn">🏠 Buy</button>
+                        <button class="action-btn build-btn" id="buildBtn">🏗️ Build</button>
+                        <button class="action-btn end-btn" id="endTurnBtn">⏭️ End</button>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-bar" id="actionBar" style="display:none">
-            <button class="action-btn buy-btn" id="buyBtn">🏠 Buy Property</button>
-            <button class="action-btn build-btn" id="buildBtn">🏗️ Build House</button>
-            <button class="action-btn end-btn" id="endTurnBtn">⏭️ End Turn</button>
         </div>
     </div>
 

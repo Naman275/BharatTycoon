@@ -494,6 +494,7 @@ function updateOwnedCells() {
             const cell = document.querySelector(`.cell[data-pos="${pos}"]`);
             if (cell) {
                 cell.classList.add('owned');
+                cell.style.setProperty('--owner-color', p.color + '90');
                 const badge = document.createElement('div');
                 badge.className = 'owner-badge';
                 badge.textContent = p.name.charAt(0);
