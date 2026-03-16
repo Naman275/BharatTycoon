@@ -215,7 +215,8 @@ const Particles = {
 
 // ---- BOARD DATA ----
 const TOKENS = ['🚗', '🚀', '🎩', '💎'];
-const TOKEN_COLORS = ['#ff4444', '#4488ff', '#44cc44', '#ff8800'];
+const DEFAULT_COLORS = ['#FF4444', '#4488FF', '#44CC44', '#FF8800'];
+const AVAILABLE_COLORS = ['#FF4444', '#4488FF', '#44CC44', '#FF8800', '#E040FB', '#00BCD4'];
 
 const BOARD = [
     { name: 'GO', type: 'go' },
@@ -370,11 +371,11 @@ function showCard(type, card) {
 }
 
 // ---- PLAYER FUNCTIONS ----
-function createPlayer(name, index) {
+function createPlayer(name, index, color) {
     return {
         name: name || `Player ${index + 1}`,
         token: TOKENS[index],
-        color: TOKEN_COLORS[index],
+        color: color || DEFAULT_COLORS[index],
         money: 1500,
         position: 0,
         properties: [],
@@ -418,19 +419,26 @@ function updateAllPanels() {
 
 // ---- BOARD RENDERING ----
 function renderTokens() {
-    // Clear all token containers
+    // Clear all token containers & cell highlights
     document.querySelectorAll('.tokens-container').forEach(tc => tc.innerHTML = '');
+    document.querySelectorAll('.cell.has-player').forEach(c => c.classList.remove('has-player'));
     
-    // Place each player's token
+    // Place each player's token as a colored circle with their initial
     game.players.forEach((p, i) => {
         if (p.bankrupt) return;
         const container = document.querySelector(`.tokens-container[data-pos="${p.position}"]`);
         if (container) {
-            const tok = document.createElement('span');
+            const tok = document.createElement('div');
             tok.className = 'board-token';
-            tok.textContent = p.token;
-            tok.style.filter = `drop-shadow(0 0 4px ${p.color})`;
+            tok.textContent = p.name.charAt(0).toUpperCase();
+            tok.style.background = p.color;
+            tok.style.setProperty('--glow-color', p.color + '80');
+            tok.title = p.name;
             container.appendChild(tok);
+            
+            // Highlight the cell
+            const cell = container.closest('.cell');
+            if (cell) cell.classList.add('has-player');
         }
     });
 }
@@ -908,7 +916,9 @@ function nextTurn() {
     }
     
     const p = currentPlayerObj();
-    $('turnIndicator').querySelector('.turn-token').textContent = p.token;
+    const turnTok = $('turnIndicator').querySelector('.turn-token');
+    turnTok.textContent = p.name.charAt(0);
+    turnTok.style.cssText = `background:${p.color};color:#fff;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;border:2px solid #fff;box-shadow:0 0 10px ${p.color}80;`;
     $('turnIndicator').querySelector('.turn-name').textContent = `${p.name}'s Turn`;
     
     game.phase = 'roll';
@@ -960,6 +970,9 @@ function endGame(winner) {
 function initGame() {
     Particles.init();
     
+    // Init color pickers on default setup
+    initColorPickers();
+
     // Player count selector
     document.querySelectorAll('.count-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -975,12 +988,17 @@ function initGame() {
                 const div = document.createElement('div');
                 div.className = 'player-input';
                 div.dataset.player = i;
+                const colorOptions = AVAILABLE_COLORS.map((c, ci) => 
+                    `<div class="color-opt ${ci === i ? 'active' : ''}" data-color="${c}" style="background:${c}"></div>`
+                ).join('');
                 div.innerHTML = `
                     <span class="token-preview">${TOKENS[i]}</span>
                     <input type="text" placeholder="Player ${i + 1}" maxlength="12">
+                    <div class="color-picker" data-player="${i}">${colorOptions}</div>
                 `;
                 container.appendChild(div);
             }
+            initColorPickers();
         });
     });
     
@@ -993,7 +1011,9 @@ function initGame() {
         
         inputs.forEach((inp, i) => {
             const name = inp.querySelector('input').value.trim() || `Player ${i + 1}`;
-            game.players.push(createPlayer(name, i));
+            const activeColor = inp.querySelector('.color-opt.active');
+            const color = activeColor ? activeColor.dataset.color : DEFAULT_COLORS[i];
+            game.players.push(createPlayer(name, i, color));
         });
         
         startGame();
@@ -1042,6 +1062,46 @@ function initGame() {
     });
 }
 
+function initColorPickers() {
+    document.querySelectorAll('.color-picker').forEach(picker => {
+        picker.querySelectorAll('.color-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                SFX.play('click');
+                // Deselect all in this picker
+                picker.querySelectorAll('.color-opt').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                
+                // Update token preview border color
+                const playerInput = picker.closest('.player-input');
+                const preview = playerInput.querySelector('.token-preview');
+                preview.style.filter = `drop-shadow(0 0 6px ${opt.dataset.color})`;
+                
+                // Mark taken colors across all pickers
+                updateTakenColors();
+            });
+        });
+    });
+    updateTakenColors();
+}
+
+function updateTakenColors() {
+    const pickers = document.querySelectorAll('.color-picker');
+    const chosen = [];
+    pickers.forEach(p => {
+        const active = p.querySelector('.color-opt.active');
+        if (active) chosen.push({ player: p.dataset.player, color: active.dataset.color });
+    });
+    
+    pickers.forEach(p => {
+        const myActive = p.querySelector('.color-opt.active');
+        const myColor = myActive ? myActive.dataset.color : null;
+        p.querySelectorAll('.color-opt').forEach(opt => {
+            const isTaken = chosen.some(c => c.color === opt.dataset.color && c.player !== p.dataset.player);
+            opt.classList.toggle('taken', isTaken);
+        });
+    });
+}
+
 function startGame() {
     $('startScreen').classList.remove('active');
     $('gameScreen').classList.add('active');
@@ -1056,7 +1116,7 @@ function startGame() {
         panel.dataset.player = i;
         panel.innerHTML = `
             <div class="panel-header">
-                <span class="panel-token">${p.token}</span>
+                <span class="panel-token" style="background:${p.color};color:#fff;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;border:2px solid rgba(255,255,255,0.5);box-shadow:0 0 8px ${p.color}60;flex-shrink:0;">${p.name.charAt(0)}</span>
                 <span class="panel-name">${p.name}</span>
             </div>
             <div class="panel-money">₹${p.money}</div>
@@ -1067,7 +1127,9 @@ function startGame() {
     
     // Set first player
     const first = currentPlayerObj();
-    $('turnIndicator').querySelector('.turn-token').textContent = first.token;
+    const turnToken = $('turnIndicator').querySelector('.turn-token');
+    turnToken.textContent = first.name.charAt(0);
+    turnToken.style.cssText = `background:${first.color};color:#fff;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;border:2px solid #fff;box-shadow:0 0 10px ${first.color}80;`;
     $('turnIndicator').querySelector('.turn-name').textContent = `${first.name}'s Turn`;
     
     renderTokens();
