@@ -318,12 +318,11 @@ html, body {
     border-radius: 8px;
     overflow: visible;
     position: relative;
-    transform: rotateX(18deg) rotateZ(-1deg);
+    transform: rotateX(8deg);
     transform-style: preserve-3d;
     box-shadow:
-        0 30px 60px rgba(0,0,0,0.5),
-        0 10px 20px rgba(0,0,0,0.3),
-        inset 0 0 80px rgba(0,0,0,0.15);
+        0 20px 50px rgba(0,0,0,0.4),
+        0 8px 16px rgba(0,0,0,0.2);
     background: #2e7d32;
 }
 
@@ -464,12 +463,16 @@ html, body {
     font-weight: 600;
 }
 
-.cell-icon {
-    font-size: 1rem;
-    margin-bottom: 1px;
+.cell-illust {
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-top: 1px;
+    opacity: 0.8;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
 }
 
 .special { background: linear-gradient(145deg, #f1f8e9, #e8f5e9); }
+.cell-icon { font-size: 0.9rem; margin-bottom: 1px; }
 .tax { background: linear-gradient(145deg, #fff8e1, #fff3e0); }
 .railroad { background: linear-gradient(145deg, #f3e5f5, #ede7f6); }
 .utility { background: linear-gradient(145deg, #e1f5fe, #e3f2fd); }
@@ -501,7 +504,8 @@ html, body {
     animation: tokenBounce 0.5s ease;
     transition: all 0.3s;
     position: relative;
-    background: linear-gradient(180deg, var(--token-color, #ff4444) 0%, color-mix(in srgb, var(--token-color, #ff4444), black 30%) 100%);
+    background: var(--token-color, #ff4444);
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.3) 100%);
     box-shadow:
         0 4px 6px rgba(0,0,0,0.3),
         0 1px 0 rgba(255,255,255,0.3) inset,
@@ -512,7 +516,7 @@ html, body {
     content: '';
     position: absolute;
     top: 2px; left: 3px;
-    width: 6px; height: 4px;
+    width: 5px; height: 3px;
     border-radius: 50%;
     background: rgba(255,255,255,0.4);
 }
@@ -520,11 +524,11 @@ html, body {
 .board-token::before {
     content: '';
     position: absolute;
-    bottom: -4px; left: 2px; right: 2px;
-    height: 4px;
+    bottom: -3px; left: 2px; right: 2px;
+    height: 3px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.2);
-    filter: blur(2px);
+    background: rgba(0,0,0,0.15);
+    filter: blur(1px);
 }
 
 @keyframes tokenBounce {
@@ -1154,7 +1158,7 @@ html, body {
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
-    .board { width: 98vw; height: 98vw; transform: rotateX(12deg); }
+    .board { width: 98vw; height: 98vw; transform: rotateX(5deg); }
     .center-title { font-size: 0.7rem; letter-spacing: 2px; }
     .cell-name { font-size: 0.3rem; }
     .cell-price { font-size: 0.3rem; }
@@ -1175,7 +1179,7 @@ html, body {
 }
 
 @media (max-width: 400px) {
-    .board { width: 100vw; height: 100vw; border-radius: 0; transform: rotateX(8deg); }
+    .board { width: 100vw; height: 100vw; border-radius: 0; transform: rotateX(3deg); }
     .cell-name { font-size: 0.22rem; }
     .corner-icon { font-size: 0.7rem; }
     .center-title { font-size: 0.6rem; }

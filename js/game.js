@@ -527,40 +527,36 @@ function rollDice() {
 function animateDice(d1, d2, callback) {
     const dice1 = $('dice1');
     const dice2 = $('dice2');
-    
+
+    // Remove any previous show classes
+    Object.values(DICE_SHOW_CLASS).forEach(c => {
+        dice1.classList.remove(c);
+        dice2.classList.remove(c);
+    });
+
+    // Start 3D rolling
     dice1.classList.add('rolling');
     dice2.classList.add('rolling');
     SFX.play('dice');
-    
-    let ticks = 0;
-    const interval = setInterval(() => {
-        setDiceFace(dice1, Math.floor(Math.random() * 6) + 1);
-        setDiceFace(dice2, Math.floor(Math.random() * 6) + 1);
-        ticks++;
-        if (ticks > 18) {
-            clearInterval(interval);
-            dice1.classList.remove('rolling');
-            dice2.classList.remove('rolling');
-            dice1.classList.add('landed');
-            dice2.classList.add('landed');
-            setDiceFace(dice1, d1);
-            setDiceFace(dice2, d2);
 
-            setTimeout(() => {
-                dice1.classList.remove('landed');
-                dice2.classList.remove('landed');
-            }, 500);
+    // Let it spin for 1.2 seconds then stop on the result
+    setTimeout(() => {
+        dice1.classList.remove('rolling');
+        dice2.classList.remove('rolling');
 
-            $('diceResult').textContent = `${d1} + ${d2} = ${d1 + d2}${d1 === d2 ? ' 🎯 DOUBLES!' : ''}`;
+        // Show the correct face
+        setDiceFace(dice1, d1);
+        setDiceFace(dice2, d2);
 
-            const diceArea = $('diceArea').getBoundingClientRect();
-            Particles.spawn(diceArea.left + diceArea.width / 2, diceArea.top, 20, ['#FFD700', '#FF8C00', '#fff']);
+        SFX.play('land');
+        $('diceResult').textContent = `${d1} + ${d2} = ${d1 + d2}${d1 === d2 ? ' 🎯 DOUBLES!' : ''}`;
 
-            setTimeout(() => callback(d1, d2), 400);
-        }
-    }, 70);
+        const diceArea = $('diceArea').getBoundingClientRect();
+        Particles.spawn(diceArea.left + diceArea.width / 2, diceArea.top + diceArea.height / 2, 25, ['#FFD700', '#FF8C00', '#fff']);
+
+        setTimeout(() => callback(d1, d2), 500);
+    }, 1200);
 }
-
 // ---- MOVEMENT ----
 function getCellCenter(pos) {
     const cellEl = document.querySelector(`.cell[data-pos="${pos}"]`);
