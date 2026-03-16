@@ -289,6 +289,25 @@ const COMMUNITY_CARDS = [
 
 const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
+// Dice dot positions for each face value (3x3 grid, positions 0-8)
+const DICE_DOTS = {
+    1: [4],
+    2: [2, 6],
+    3: [2, 4, 6],
+    4: [0, 2, 6, 8],
+    5: [0, 2, 4, 6, 8],
+    6: [0, 2, 3, 5, 6, 8]
+};
+
+function setDiceFace(diceEl, value) {
+    diceEl.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dice-dot' + (DICE_DOTS[value].includes(i) ? ' active' : '');
+        diceEl.appendChild(dot);
+    }
+}
+
 // ---- GAME STATE ----
 let game = {
     players: [],
@@ -466,14 +485,22 @@ function renderHouses() {
 }
 
 function updateOwnedCells() {
-    document.querySelectorAll('.cell').forEach(cell => {
-        cell.classList.remove('owned-0', 'owned-1', 'owned-2', 'owned-3');
-    });
-    
+    // Remove all existing badges and owned class
+    document.querySelectorAll('.owner-badge').forEach(b => b.remove());
+    document.querySelectorAll('.cell.owned').forEach(c => c.classList.remove('owned'));
+
     game.players.forEach((p, i) => {
         p.properties.forEach(pos => {
             const cell = document.querySelector(`.cell[data-pos="${pos}"]`);
-            if (cell) cell.classList.add(`owned-${i}`);
+            if (cell) {
+                cell.classList.add('owned');
+                const badge = document.createElement('div');
+                badge.className = 'owner-badge';
+                badge.textContent = p.name.charAt(0);
+                badge.style.background = p.color;
+                badge.title = `Owned by ${p.name}`;
+                cell.appendChild(badge);
+            }
         });
     });
 }
@@ -1121,13 +1148,21 @@ function initGame() {
 
     // Cell click to show info
     document.querySelectorAll('.cell').forEach(cell => {
+        cell.style.cursor = 'pointer';
         cell.addEventListener('click', (e) => {
+            // Don't show info during animation
+            if (game.isAnimating) return;
+            // Don't show if popup/overlay is active
+            if (document.querySelector('.popup-overlay.active') || document.querySelector('.card-overlay.active')) return;
             const pos = parseInt(cell.dataset.pos);
             if (!isNaN(pos)) showCellInfo(pos, e);
         });
-        cell.style.cursor = 'pointer';
     });
     
+    // Init dice faces
+    setDiceFace($('dice1'), 1);
+    setDiceFace($('dice2'), 1);
+
     // Init color pickers on default setup
     initColorPickers();
 
