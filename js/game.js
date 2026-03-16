@@ -522,23 +522,59 @@ function animateDice(d1, d2, callback) {
 }
 
 // ---- MOVEMENT ----
+function getCellCenter(pos) {
+    const cellEl = document.querySelector(`.cell[data-pos="${pos}"]`);
+    if (!cellEl) return null;
+    const rect = cellEl.getBoundingClientRect();
+    const boardRect = $('gameBoard').getBoundingClientRect();
+    return {
+        x: rect.left - boardRect.left + rect.width / 2,
+        y: rect.top - boardRect.top + rect.height / 2
+    };
+}
+
 function movePlayer(playerIndex, steps, callback) {
     const p = game.players[playerIndex];
     let moved = 0;
     game.isAnimating = true;
+
+    // Create a floating token for animation
+    const board = $('gameBoard');
+    const floater = document.createElement('div');
+    floater.className = 'board-token moving';
+    floater.textContent = p.name.charAt(0).toUpperCase();
+    floater.style.background = p.color;
+    floater.style.position = 'absolute';
+    floater.style.zIndex = '50';
+    floater.style.transition = 'left 0.15s ease, top 0.15s ease';
+    floater.style.width = '22px';
+    floater.style.height = '22px';
+    floater.style.fontSize = '0.6rem';
+    floater.style.boxShadow = `0 3px 12px rgba(0,0,0,0.5), 0 0 16px ${p.color}80`;
     
+    const startPos = getCellCenter(p.position);
+    if (startPos) {
+        floater.style.left = (startPos.x - 11) + 'px';
+        floater.style.top = (startPos.y - 11) + 'px';
+    }
+    board.appendChild(floater);
+
+    // Hide the static token for this player during animation
+    renderTokens();
+
     const moveStep = () => {
         if (moved >= steps) {
             game.isAnimating = false;
+            floater.remove();
             SFX.play('land');
             renderTokens();
             if (callback) callback();
             return;
         }
-        
+
         p.position = (p.position + 1) % 40;
         moved++;
-        
+
         // Passed GO
         if (p.position === 0 && moved < steps) {
             p.money += 200;
@@ -547,12 +583,21 @@ function movePlayer(playerIndex, steps, callback) {
             SFX.play('go');
             updatePlayerPanel(playerIndex);
         }
-        
-        renderTokens();
-        setTimeout(moveStep, 120);
+
+        // Animate the floater to new cell
+        const newPos = getCellCenter(p.position);
+        if (newPos) {
+            floater.style.left = (newPos.x - 11) + 'px';
+            floater.style.top = (newPos.y - 11) + 'px';
+        }
+
+        // Play a soft step sound every few cells
+        if (moved % 2 === 0) SFX.play('click');
+
+        setTimeout(moveStep, 180);
     };
-    
-    moveStep();
+
+    setTimeout(moveStep, 100);
 }
 
 function movePlayerTo(playerIndex, pos, callback) {
@@ -966,9 +1011,122 @@ function endGame(winner) {
     }, 1500);
 }
 
+// ---- CELL INFO POPUP ----
+function showCellInfo(pos, evt) {
+    // Remove existing popup
+    const existing = document.querySelector('.cell-info-popup');
+    if (existing) existing.remove();
+
+    const cell = BOARD[pos];
+    const popup = document.createElement('div');
+    popup.className = 'cell-info-popup';
+
+    let html = '';
+
+    if (cell.type === 'property') {
+        const owner = game.players.findIndex(pl => pl.properties.includes(pos));
+        const ownerP = owner >= 0 ? game.players[owner] : null;
+        const houses = ownerP ? (ownerP.houses[pos] || 0) : 0;
+
+        html = `<div class="cip-header">
+            <div class="cip-color-dot" style="background:var(--${cell.color})"></div>
+            <div class="cip-name">${cell.name}</div>
+            <button class="cip-close" onclick="this.closest('.cell-info-popup').remove()">&times;</button>
+        </div>
+        <div class="cip-row"><span>Price</span><span>₹${cell.price}</span></div>
+        <div class="cip-row"><span>Rent (no houses)</span><span>₹${cell.rent[0]}</span></div>
+        <div class="cip-row"><span>Rent (1 house)</span><span>₹${cell.rent[1]}</span></div>
+        <div class="cip-row"><span>Rent (2 houses)</span><span>₹${cell.rent[2]}</span></div>
+        <div class="cip-row"><span>Rent (3 houses)</span><span>₹${cell.rent[3]}</span></div>
+        <div class="cip-row"><span>Rent (4 houses)</span><span>₹${cell.rent[4]}</span></div>
+        <div class="cip-row"><span>Rent (Hotel)</span><span>₹${cell.rent[5]}</span></div>
+        <div class="cip-row"><span>House Cost</span><span>₹${cell.buildCost}</span></div>
+        <div class="cip-row"><span>Houses Built</span><span>${houses === 5 ? '🏨 Hotel' : '🏠 ' + houses}</span></div>`;
+        if (ownerP) {
+            html += `<div class="cip-owner"><div class="cip-owner-dot" style="background:${ownerP.color}"></div>Owned by ${ownerP.name}</div>`;
+        } else {
+            html += `<div class="cip-owner">🏷️ Not owned</div>`;
+        }
+    } else if (cell.type === 'railroad') {
+        const owner = game.players.findIndex(pl => pl.properties.includes(pos));
+        const ownerP = owner >= 0 ? game.players[owner] : null;
+        html = `<div class="cip-header">
+            <div class="cip-name">🚂 ${cell.name}</div>
+            <button class="cip-close" onclick="this.closest('.cell-info-popup').remove()">&times;</button>
+        </div>
+        <div class="cip-row"><span>Price</span><span>₹${cell.price}</span></div>
+        <div class="cip-row"><span>Rent (1 RR)</span><span>₹25</span></div>
+        <div class="cip-row"><span>Rent (2 RR)</span><span>₹50</span></div>
+        <div class="cip-row"><span>Rent (3 RR)</span><span>₹100</span></div>
+        <div class="cip-row"><span>Rent (4 RR)</span><span>₹200</span></div>`;
+        if (ownerP) {
+            html += `<div class="cip-owner"><div class="cip-owner-dot" style="background:${ownerP.color}"></div>Owned by ${ownerP.name}</div>`;
+        } else {
+            html += `<div class="cip-owner">🏷️ Not owned</div>`;
+        }
+    } else if (cell.type === 'utility') {
+        const owner = game.players.findIndex(pl => pl.properties.includes(pos));
+        const ownerP = owner >= 0 ? game.players[owner] : null;
+        html = `<div class="cip-header">
+            <div class="cip-name">${pos === 12 ? '⚡' : '💧'} ${cell.name}</div>
+            <button class="cip-close" onclick="this.closest('.cell-info-popup').remove()">&times;</button>
+        </div>
+        <div class="cip-row"><span>Price</span><span>₹${cell.price}</span></div>
+        <div class="cip-row"><span>Rent (1 util)</span><span>₹28</span></div>
+        <div class="cip-row"><span>Rent (2 utils)</span><span>₹70</span></div>`;
+        if (ownerP) {
+            html += `<div class="cip-owner"><div class="cip-owner-dot" style="background:${ownerP.color}"></div>Owned by ${ownerP.name}</div>`;
+        } else {
+            html += `<div class="cip-owner">🏷️ Not owned</div>`;
+        }
+    } else if (cell.type === 'tax') {
+        html = `<div class="cip-header">
+            <div class="cip-name">💸 ${cell.name}</div>
+            <button class="cip-close" onclick="this.closest('.cell-info-popup').remove()">&times;</button>
+        </div>
+        <div class="cip-special"><div class="cip-icon">💸</div>Pay ₹${cell.amount}</div>`;
+    } else {
+        const icons = { go: '🏁', jail: '🔒', parking: '🅿️', gotojail: '👮', chance: '❓', community: '🃏' };
+        const descs = { go: 'Collect ₹200 when you pass or land here', jail: 'Just visiting! (or stuck if sent here)', parking: 'Rest here. Nothing happens.', gotojail: 'Go directly to Jail!', chance: 'Draw a Chance card', community: 'Draw a Community Chest card' };
+        html = `<div class="cip-header">
+            <div class="cip-name">${icons[cell.type] || ''} ${cell.name}</div>
+            <button class="cip-close" onclick="this.closest('.cell-info-popup').remove()">&times;</button>
+        </div>
+        <div class="cip-special"><div class="cip-icon">${icons[cell.type] || '📍'}</div>${descs[cell.type] || ''}</div>`;
+    }
+
+    popup.innerHTML = html;
+    document.body.appendChild(popup);
+
+    // Position near the click
+    const x = Math.min(evt.clientX, window.innerWidth - 290);
+    const y = Math.min(evt.clientY, window.innerHeight - popup.offsetHeight - 10);
+    popup.style.left = Math.max(10, x) + 'px';
+    popup.style.top = Math.max(10, y) + 'px';
+
+    // Close on outside click
+    setTimeout(() => {
+        const closer = (e) => {
+            if (!popup.contains(e.target)) { popup.remove(); document.removeEventListener('click', closer); }
+        };
+        document.addEventListener('click', closer);
+    }, 100);
+
+    SFX.play('click');
+}
+
 // ---- INITIALIZATION ----
 function initGame() {
     Particles.init();
+
+    // Cell click to show info
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.addEventListener('click', (e) => {
+            const pos = parseInt(cell.dataset.pos);
+            if (!isNaN(pos)) showCellInfo(pos, e);
+        });
+        cell.style.cursor = 'pointer';
+    });
     
     // Init color pickers on default setup
     initColorPickers();
@@ -1115,11 +1273,8 @@ function startGame() {
         panel.className = `player-panel ${i === 0 ? 'active' : ''}`;
         panel.dataset.player = i;
         panel.innerHTML = `
-            <div class="panel-header">
-                <span class="panel-token" style="background:${p.color};color:#fff;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;border:2px solid rgba(255,255,255,0.5);box-shadow:0 0 8px ${p.color}60;flex-shrink:0;">${p.name.charAt(0)}</span>
-                <span class="panel-name">${p.name}</span>
-            </div>
-            <div class="panel-money">₹${p.money}</div>
+            <span class="panel-token" style="background:${p.color};color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:0.6rem;border:2px solid #fff;box-shadow:0 0 6px ${p.color}60;flex-shrink:0;">${p.name.charAt(0)}</span>
+            <span class="panel-money">₹${p.money}</span>
             <div class="panel-props"></div>
         `;
         panelsContainer.appendChild(panel);
