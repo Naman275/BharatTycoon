@@ -316,9 +316,9 @@ html, body {
     max-height: 700px;
     border: 4px solid #1b5e20;
     border-radius: 8px;
-    overflow: visible;
+    overflow: hidden;
     position: relative;
-    transform: rotateX(8deg);
+    transform: rotateX(5deg);
     transform-style: preserve-3d;
     box-shadow:
         0 20px 50px rgba(0,0,0,0.4),
@@ -344,8 +344,7 @@ html, body {
 
 .cell:hover {
     z-index: 5;
-    filter: brightness(1.1);
-    box-shadow: 0 0 12px rgba(255,215,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
+    filter: brightness(1.08);
 }
 
 /* Corners */
@@ -532,15 +531,16 @@ html, body {
 }
 
 @keyframes tokenBounce {
-    0% { transform: translateY(-20px) scale(0); opacity: 0; }
-    60% { transform: translateY(3px) scale(1.3); }
+    0% { transform: translateY(-15px) scale(0); opacity: 0; }
+    50% { transform: translateY(2px) scale(1.15); opacity: 1; }
+    70% { transform: translateY(-3px) scale(0.95); }
     100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 /* Highlight cell with player on it */
 .cell.has-player {
     z-index: 6;
-    box-shadow: 0 0 12px rgba(255,215,0,0.4) !important;
+    filter: brightness(1.05);
 }
 
 /* Houses */
@@ -609,6 +609,7 @@ html, body {
 .dice-scene {
     width: 46px; height: 46px;
     perspective: 300px;
+    display: inline-block;
 }
 
 .dice {
@@ -652,15 +653,21 @@ html, body {
 }
 
 .dice.rolling {
-    animation: diceRoll3D 0.3s infinite linear;
+    animation: diceRoll3D 0.4s infinite linear;
+}
+
+.dice-scene:nth-child(2) .dice.rolling {
+    animation: diceRoll3D2 0.35s infinite linear;
 }
 
 @keyframes diceRoll3D {
-    0% { transform: translateZ(-23px) rotateX(0deg) rotateY(0deg); }
-    25% { transform: translateZ(-23px) rotateX(90deg) rotateY(90deg); }
-    50% { transform: translateZ(-23px) rotateX(180deg) rotateY(180deg); }
-    75% { transform: translateZ(-23px) rotateX(270deg) rotateY(270deg); }
-    100% { transform: translateZ(-23px) rotateX(360deg) rotateY(360deg); }
+    0% { transform: translateZ(-23px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: translateZ(-23px) rotateX(360deg) rotateY(360deg) rotateZ(180deg); }
+}
+
+@keyframes diceRoll3D2 {
+    0% { transform: translateZ(-23px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: translateZ(-23px) rotateX(-360deg) rotateY(180deg) rotateZ(360deg); }
 }
 
 .dice.show-1 { transform: translateZ(-23px) rotateX(0deg) rotateY(0deg); }
@@ -690,11 +697,15 @@ html, body {
 .roll-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .dice-result {
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.7rem;
+    font-weight: 800;
     color: #1b5e20;
     z-index: 3;
-    min-height: 20px;
+    min-height: 16px;
+    background: rgba(255,255,255,0.3);
+    padding: 2px 12px;
+    border-radius: 10px;
+    text-align: center;
 }
 
 /* Player Panels (inside board center) */
@@ -1173,6 +1184,12 @@ html, body {
     .dice__face--left   { transform: rotateY(-90deg) translateZ(18px); }
     .dice__face--top    { transform: rotateX(90deg) translateZ(18px); }
     .dice__face--bottom { transform: rotateX(-90deg) translateZ(18px); }
+    .dice.show-1 { transform: translateZ(-18px) rotateX(0deg) rotateY(0deg); }
+    .dice.show-2 { transform: translateZ(-18px) rotateX(0deg) rotateY(-90deg); }
+    .dice.show-3 { transform: translateZ(-18px) rotateX(0deg) rotateY(180deg); }
+    .dice.show-4 { transform: translateZ(-18px) rotateX(0deg) rotateY(90deg); }
+    .dice.show-5 { transform: translateZ(-18px) rotateX(-90deg) rotateY(0deg); }
+    .dice.show-6 { transform: translateZ(-18px) rotateX(90deg) rotateY(0deg); }
     .roll-btn { padding: 5px 14px; font-size: 0.65rem; }
     .action-btn { padding: 4px 10px; font-size: 0.5rem; }
     .board-token { width: 14px; height: 18px; font-size: 0.4rem; }

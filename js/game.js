@@ -582,10 +582,18 @@ function movePlayer(playerIndex, steps, callback) {
     floater.style.setProperty('--token-color', p.color);
     floater.style.position = 'absolute';
     floater.style.zIndex = '50';
-    floater.style.transition = 'left 0.15s ease, top 0.15s ease';
+    floater.style.transition = 'left 0.25s cubic-bezier(0.4,0,0.2,1), top 0.25s cubic-bezier(0.4,0,0.2,1)';
     floater.style.width = '22px';
     floater.style.height = '26px';
     floater.style.fontSize = '0.6rem';
+    floater.style.display = 'flex';
+    floater.style.alignItems = 'center';
+    floater.style.justifyContent = 'center';
+    floater.style.borderRadius = '50% 50% 50% 50% / 40% 40% 60% 60%';
+    floater.style.border = '2px solid rgba(255,255,255,0.7)';
+    floater.style.color = '#fff';
+    floater.style.fontWeight = '900';
+    floater.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
 
     const startPos = getCellCenter(p.position);
     if (startPos) {
@@ -619,6 +627,20 @@ function movePlayer(playerIndex, steps, callback) {
             updatePlayerPanel(playerIndex);
         }
 
+        // Leave a fading trail
+        const trailPos = getCellCenter((p.position - 1 + 40) % 40);
+        if (trailPos) {
+            const trail = document.createElement('div');
+            trail.className = 'token-trail';
+            trail.style.background = p.color;
+            trail.style.width = '8px';
+            trail.style.height = '8px';
+            trail.style.left = (trailPos.x - 4) + 'px';
+            trail.style.top = (trailPos.y - 4) + 'px';
+            board.appendChild(trail);
+            setTimeout(() => trail.remove(), 400);
+        }
+
         // Animate the floater to new cell
         const newPos = getCellCenter(p.position);
         if (newPos) {
@@ -629,10 +651,10 @@ function movePlayer(playerIndex, steps, callback) {
         // Play a soft step sound every few cells
         if (moved % 2 === 0) SFX.play('click');
 
-        setTimeout(moveStep, 180);
+        setTimeout(moveStep, 300);
     };
 
-    setTimeout(moveStep, 100);
+    setTimeout(moveStep, 150);
 }
 
 function movePlayerTo(playerIndex, pos, callback) {
@@ -992,7 +1014,7 @@ function nextTurn() {
     
     if (game.currentPlayer === 0) {
         game.round++;
-        $('roundCounter').textContent = `Round ${game.round}`;
+        $('roundCounter').textContent = `R${game.round}`;
     }
     
     const p = currentPlayerObj();
@@ -1226,6 +1248,7 @@ function initGame() {
     $('rollBtn').addEventListener('click', () => {
         if (game.phase !== 'roll' || game.isAnimating) return;
         $('rollBtn').disabled = true;
+        game.isAnimating = true;
         
         const [d1, d2] = rollDice();
         
